@@ -46,6 +46,45 @@
       margin-bottom: 25px;
     }
 
+    /* ===== TABS ===== */
+    .tabs {
+      display: flex;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .tab-button.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .tab-button:hover {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--accent);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
     label {
       font-weight: 600;
       margin-bottom: 8px;
@@ -169,9 +208,8 @@
 
     /* ===== NOTIFICATION SECTION ===== */
     .notification-section {
-      margin-top: 30px;
-      padding-top: 25px;
-      border-top: 1px solid rgba(0, 212, 255, 0.2);
+      margin-top: 0;
+      padding-top: 0;
     }
 
     .notification-section h3 {
@@ -219,45 +257,57 @@
   <div class="container">
     <h1>Mines Predictor Admin</h1>
 
-    <label>Select Plan</label>
-    <select id="plan">
-      <option value="7">Week - 3000 Tsh</option>
-      <option value="30">Month - 5000 Tsh</option>
-    </select>
-
-    <button class="btn btn-primary" onclick="generateKey()">Generate Access Key</button>
-
-    <div class="result" id="result">
-      <h3>Generated Key</h3>
-      <div class="key-display" id="generatedKey"></div>
-      <p>Expires: <strong id="expirationDate"></strong></p>
-      <button class="copy-btn" onclick="copyKey()">Copy Key</button>
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="switchTab('keys')">Access Key Center</button>
+      <button class="tab-button" onclick="switchTab('notifications')">Notification Center</button>
     </div>
 
-    <div class="keys-list">
-      <h3>All Keys</h3>
-      <button class="btn btn-danger" onclick="confirmDeleteAll()">Delete All Keys</button>
-      <div id="keysContainer"></div>
-    </div>
-
-    <div class="notification-section">
-      <h3>Create Notification</h3>
-      <label>Title</label>
-      <input type="text" id="notificationTitle" placeholder="Notification title" maxlength="100">
-      
-      <label>Message</label>
-      <textarea id="notificationMessage" placeholder="Notification message" rows="3" maxlength="500"></textarea>
-      
-      <label>Type</label>
-      <select id="notificationType">
-        <option value="info">Info</option>
-        <option value="warning">Warning</option>
-        <option value="update">Update</option>
-        <option value="news">News</option>
+    <!-- Access Key Center Tab -->
+    <div id="keys-tab" class="tab-content active">
+      <label>Select Plan</label>
+      <select id="plan">
+        <option value="7">Week - 3000 Tsh</option>
+        <option value="30">Month - 5000 Tsh</option>
       </select>
-      
-      <button class="btn btn-primary" onclick="createNotification()">Create Notification</button>
-      <!-- <button class="btn btn-secondary" onclick="exportNotifications()">Export Notifications</button> -->
+
+      <button class="btn btn-primary" onclick="generateKey()">Generate Access Key</button>
+
+      <div class="result" id="result">
+        <h3>Generated Key</h3>
+        <div class="key-display" id="generatedKey"></div>
+        <p>Expires: <strong id="expirationDate"></strong></p>
+        <button class="copy-btn" onclick="copyKey()">Copy Key</button>
+      </div>
+
+      <div class="keys-list">
+        <h3>All Keys</h3>
+        <button class="btn btn-danger" onclick="confirmDeleteAll()">Delete All Keys</button>
+        <div id="keysContainer"></div>
+      </div>
+    </div>
+
+    <!-- Notification Center Tab -->
+    <div id="notifications-tab" class="tab-content">
+      <div class="notification-section">
+        <h3>Create Notification</h3>
+        <label>Title</label>
+        <input type="text" id="notificationTitle" placeholder="Notification title" maxlength="100">
+        
+        <label>Message</label>
+        <textarea id="notificationMessage" placeholder="Notification message" rows="3" maxlength="500"></textarea>
+        
+        <label>Type</label>
+        <select id="notificationType">
+          <option value="info">Info</option>
+          <option value="warning">Warning</option>
+          <option value="update">Update</option>
+          <option value="news">News</option>
+        </select>
+        
+        <button class="btn btn-primary" onclick="createNotification()">Create Notification</button>
+        <!-- <button class="btn btn-secondary" onclick="exportNotifications()">Export Notifications</button> -->
+      </div>
     </div>
   </div>
 
@@ -289,6 +339,23 @@
 
     function closeModal() {
       document.getElementById('modal').style.display = 'none';
+    }
+
+    // Tab switching function
+    function switchTab(tabName) {
+      // Hide all tab contents
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Remove active class from all tab buttons
+      const tabButtons = document.querySelectorAll('.tab-button');
+      tabButtons.forEach(button => button.classList.remove('active'));
+      
+      // Show selected tab content
+      document.getElementById(tabName + '-tab').classList.add('active');
+      
+      // Add active class to clicked button
+      event.target.classList.add('active');
     }
 
 function generateAccessKey(planCode) {
@@ -484,8 +551,6 @@ function generateAccessKey(planCode) {
       
       showModal('Export Complete', 'Notifications exported successfully!');
     }
-
-    updateKeysList();
   </script>
 </body>
 </html>
