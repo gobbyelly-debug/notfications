@@ -244,69 +244,6 @@
       resize: vertical;
       min-height: 80px;
     }
-
-    /* ===== VIDEO SECTION ===== */
-    .video-section h3 {
-      color: var(--accent);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .video-section h4 {
-      color: var(--accent);
-      margin-bottom: 15px;
-    }
-
-    .upload-section input[type="file"] {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-
-    .video-item {
-      background: var(--bg);
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .video-info {
-      flex: 1;
-    }
-
-    .video-info strong {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .video-info small {
-      color: var(--muted);
-      display: block;
-    }
-
-    .video-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-small {
-      padding: 8px 12px;
-      font-size: 14px;
-      border-radius: 6px;
-    }
-
-    .btn-danger-small {
-      background: var(--danger);
-    }
   </style>
 </head>
 
@@ -318,7 +255,6 @@
     <div class="tabs">
       <button class="tab-button active" onclick="switchTab('keys')">Access Key Center</button>
       <button class="tab-button" onclick="switchTab('notifications')">Notification Center</button>
-      <button class="tab-button" onclick="switchTab('videos')">Video Ads Center</button>
     </div>
 
     <!-- ACCESS KEYS TAB -->
@@ -368,27 +304,6 @@
       </div>
     </div>
 
-    <!-- VIDEO ADS TAB -->
-    <div id="videos-tab" class="tab-content">
-      <div class="video-section">
-        <h3>Video Ad Management</h3>
-        
-        <div class="upload-section">
-          <label>Upload Video Ad</label>
-          <input type="file" id="videoFile" accept="video/*" style="margin-bottom: 10px;">
-          <button class="btn btn-primary" onclick="uploadVideo()">Upload Video</button>
-          <div id="uploadProgress" style="display: none; margin-top: 10px;">
-            <progress value="0" max="100" style="width: 100%;"></progress>
-            <p>Uploading... <span id="progressText">0%</span></p>
-          </div>
-        </div>
-
-        <div class="videos-list" style="margin-top: 30px;">
-          <h4>Uploaded Videos</h4>
-          <button class="btn btn-secondary" onclick="loadVideos()" style="margin-bottom: 15px;">Refresh Videos</button>
-          <div id="videosContainer"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -410,7 +325,6 @@
     // Load keys on page load
     window.onload = function() {
       loadKeys();
-      loadVideos();
     };
 
     function switchTab(tabName) {
@@ -633,154 +547,8 @@ function generateAccessKey(planCode) {
       showModal('Export Complete', 'Notifications exported successfully!');
     }
 
-    // ===== VIDEO MANAGEMENT FUNCTIONS =====
-
-    async function uploadVideo() {
-      const fileInput = document.getElementById('videoFile');
-      const file = fileInput.files[0];
-
-      if (!file) {
-        showModal('Error', 'Please select a video file to upload');
-        return;
-      }
-
-      // Validate file size (100MB limit)
-      if (file.size > 100 * 1024 * 1024) {
-        showModal('Error', 'Video file size must be less than 100MB');
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith('video/')) {
-        showModal('Error', 'Please select a valid video file');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('video', file);
-
-      const progressDiv = document.getElementById('uploadProgress');
-      const progressBar = progressDiv.querySelector('progress');
-      const progressText = document.getElementById('progressText');
-
-      progressDiv.style.display = 'block';
-      progressBar.value = 0;
-      progressText.textContent = '0%';
-
-      try {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 100;
-            progressBar.value = percentComplete;
-            progressText.textContent = Math.round(percentComplete) + '%';
-          }
-        });
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.success) {
-              showModal('Success', 'Video uploaded successfully!');
-              fileInput.value = '';
-              progressDiv.style.display = 'none';
-              loadVideos(); // Refresh the videos list
-            } else {
-              showModal('Error', response.error || 'Failed to upload video');
-            }
-          } else {
-            const error = JSON.parse(xhr.responseText);
-            showModal('Error', error.error || 'Failed to upload video');
-          }
-        });
-
-        xhr.addEventListener('error', () => {
-          showModal('Error', 'Network error occurred during upload');
-        });
-
-        xhr.open('POST', `${API_BASE_URL}/api/videos/upload`);
-        xhr.send(formData);
-
-      } catch (error) {
-        console.error('Error uploading video:', error);
-        progressDiv.style.display = 'none';
-        showModal('Error', 'Failed to upload video');
-      }
-    }
-
-    async function loadVideos() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/videos`);
-        const data = await response.json();
-
-        if (data.success) {
-          updateVideosList(data.videos);
-        } else {
-          console.error('Failed to load videos:', data.error);
-        }
-      } catch (error) {
-        console.error('Error loading videos:', error);
-      }
-    }
-
-    function updateVideosList(videos) {
-      const container = document.getElementById('videosContainer');
-      container.innerHTML = '';
-
-      if (videos.length === 0) {
-        container.innerHTML = '<p style="color: var(--muted); text-align: center;">No videos uploaded yet</p>';
-        return;
-      }
-
-      videos.forEach((video) => {
-        const div = document.createElement('div');
-        div.className = 'video-item';
-
-        const sizeMB = (video.size / (1024 * 1024)).toFixed(2);
-        const uploadDate = new Date(video.uploadedAt).toLocaleDateString();
-
-        div.innerHTML = `
-          <div class="video-info">
-            <strong>${video.originalName}</strong>
-            <small>Size: ${sizeMB} MB</small>
-            <small>Uploaded: ${uploadDate}</small>
-          </div>
-          <div class="video-actions">
-            <button class="btn btn-small btn-danger-small" onclick="deleteVideo('${video.id}', '${video.originalName}')">
-              Delete
-            </button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    async function deleteVideo(videoId, videoName) {
-      if (!confirm(`Are you sure you want to delete "${videoName}"? This action cannot be undone.`)) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
-          method: 'DELETE',
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          showModal('Deleted', 'Video deleted successfully');
-          loadVideos(); // Refresh the list
-        } else {
-          showModal('Error', data.error || 'Failed to delete video');
-        }
-      } catch (error) {
-        console.error('Error deleting video:', error);
-        showModal('Error', 'Failed to delete video');
-      }
-    }
-
     updateKeysList();
+  </script>
   </script>
 </body>
 </html>
