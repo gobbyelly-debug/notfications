@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - Mines Predictor Admin</title>
+
+  <style>
+    :root {
+      --bg: #0F1923;
+      --card: #1A2332;
+      --accent: #00D4FF;
+      --danger: #FF6B00;
+      --text: #ffffff;
+      --muted: #a0aec0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #00D4FF, #0099FF);
+      margin-top: 20px;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(45deg, #666, #999);
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    /* ===== CUSTOM MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 14px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal p {
+      margin-bottom: 20px;
+      color: var(--muted);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ===== NOTIFICATION SECTION ===== */
+    .notification-section {
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .notification-section h3 {
+      color: var(--accent);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .notification-section label {
+      margin-top: 15px;
+    }
+
+    .notification-section input,
+    .notification-section textarea,
+    .notification-section select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      margin-bottom: 5px;
+      transition: all 0.3s ease;
+    }
+    .notification-section textarea{
+      resize: none;
+     }
+    .notification-section input:focus,
+    .notification-section textarea:focus,
+    .notification-section select:focus {
+      outline: none;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+
+    .notification-section textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .nav {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .nav a {
+      color: var(--accent);
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    .nav a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="index.html">Home</a> |
+      <a href="key-generation.html">Key Generation</a> |
+      <a href="video-upload.html">Video Ads</a>
+    </div>
+    <h1>Notifications</h1>
+
+    <div class="notification-section">
+      <h3>Create Notification</h3>
+      <label>Title</label>
+      <input type="text" id="notificationTitle" placeholder="Notification title" maxlength="100">
+      
+      <label>Message</label>
+      <textarea id="notificationMessage" placeholder="Notification message" rows="3" maxlength="500"></textarea>
+      
+      <label>Type</label>
+      <select id="notificationType">
+        <option value="info">Info</option>
+        <option value="warning">Warning</option>
+        <option value="update">Update</option>
+        <option value="news">News</option>
+      </select>
+      
+      <button class="btn btn-primary" onclick="createNotification()">Create Notification</button>
+      <!-- <button class="btn btn-secondary" onclick="exportNotifications()">Export Notifications</button> -->
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <div class="modal-buttons">
+        <button class="btn btn-primary" onclick="closeModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // API Configuration
+    const API_BASE_URL = 'https://mines-predictor-backend.onrender.com';
+
+    function showModal(title, message) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function createNotification() {
+      const title = document.getElementById('notificationTitle').value.trim();
+      const message = document.getElementById('notificationMessage').value.trim();
+      const type = document.getElementById('notificationType').value;
+
+      if (!title || !message) {
+        showModal('Error', 'Please fill in both title and message');
+        return;
+      }
+
+      // Send to backend server
+      sendNotificationToBackend(title, message, type);
+
+      // Also store locally for admin reference
+      const notification = {
+        id: Date.now().toString(),
+        title: title,
+        message: message,
+        type: type,
+        date: new Date().toISOString(),
+        isRead: false
+      };
+
+      let notifications = JSON.parse(localStorage.getItem('appNotifications')) || [];
+      notifications.unshift(notification);
+      localStorage.setItem('appNotifications', JSON.stringify(notifications));
+
+      // Clear form
+      document.getElementById('notificationTitle').value = '';
+      document.getElementById('notificationMessage').value = '';
+
+      updateNotificationsList();
+    }
+
+    async function sendNotificationToBackend(title, message, type) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/notifications/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: title,
+            body: message,
+            type: type
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          showModal('Success', `Notification sent to all users! Message ID: ${result.messageId}`);
+        } else {
+          const error = await response.json();
+          showModal('Error', `Failed to send notification: ${error.error}`);
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        showModal('Warning', 'Notification stored locally but failed to send to users. Check if backend server is running.');
+      }
+    }
+
+    function updateNotificationsList() {
+      // This would show created notifications, but for now just confirm creation
+    }
+
+    function exportNotifications() {
+      const notifications = JSON.parse(localStorage.getItem('appNotifications')) || [];
+      const dataStr = JSON.stringify(notifications, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'notifications_export.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      showModal('Export Complete', 'Notifications exported successfully!');
+    }
+  </script>
+</body>
+</html>
