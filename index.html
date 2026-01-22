@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mines Predictor Admin</title>
+
+  <style>
+    :root {
+      --bg: #0F1923;
+      --card: #1A2332;
+      --accent: #00D4FF;
+      --text: #ffffff;
+      --muted: #a0aec0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--accent);
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 0;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #00D4FF, #0099FF);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(45deg, #FF6B00, #FF8C00);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Mines Predictor Admin</h1>
+    <p>Choose an admin function:</p>
+    <a href="key-generation.html" class="btn btn-primary">Access Key Generation</a>
+    <a href="notification.html" class="btn btn-secondary">Notifications</a>
+  </div>
+</body>
+</html>
